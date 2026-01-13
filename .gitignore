@@ -1,0 +1,45 @@
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+
+# Compiled PDF (can be regenerated)
+main.pdf
+
+# Backup files
+*_backup_*.bib
+*.bak
+
+# Internal reports
+*_optimization_report.md
+
+# Editor files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Manuscript source (EXCLUDED)
+main.tex
+references.bib
+*.bib
+*.tex
+# Allow TeX files in Supplementary/ (e.g. TikZ figures)
+!Supplementary/*.tex
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
