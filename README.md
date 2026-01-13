@@ -1,4 +1,4 @@
-# Proportionate Defense: A NIST-Aligned Cyber Risk Scoring Model
+# Supplementary Materials: Proportionate Defense
 
 [![Paper Status](https://img.shields.io/badge/status-under%20review-yellow)](https://arxiv.org/)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -6,13 +6,9 @@
 
 ## Overview
 
-This repository contains the simulation code, synthetic dataset, and supplementary materials for the paper:
+This repository contains the **supplementary materials** (simulation code and dataset) for the research paper:
 
 > **Proportionate Defense: A NIST-Aligned Cyber Risk Scoring Model for Resource-Constrained Enterprises**
->
-> *Tran Duc Le, Phuc Hao Do, Truong Duy Dinh*, Van Dai Pham, Thi Le Quyen Nguyen*
->
-> *Corresponding author: <duydt@ptit.edu.vn>
 
 ## Abstract
 
@@ -25,15 +21,6 @@ Small and Medium Enterprises (SMEs) face a "Security Paradox": they are high-val
 ## Repository Structure
 
 ```
-├── Figs/                        # Publication-ready figures (PDF)
-│   ├── Fig1.pdf                 # Framework Comparison
-│   ├── Fig2.pdf                 # Model Architecture
-│   ├── Fig4.pdf                 # Methodology Workflow
-│   ├── Fig5.pdf                 # Score Distribution
-│   ├── Fig6.pdf                 # Rating Distribution
-│   ├── Fig7_Sensitivity.pdf     # Parameter Sensitivity Heatmap
-│   └── Fig8_Decay.pdf           # Shadow IT Decay Function
-│
 ├── Supplementary/               # Reproducibility materials
 │   ├── simulate_scores.py       # Monte Carlo simulation engine
 │   ├── generate_sme_data.py     # Synthetic SME profile generator
@@ -104,29 +91,6 @@ The `synthetic_sme_dataset.csv` contains 1,000 profiles with:
 | `shadow_it_ratio` | Unmanaged/Managed asset ratio |
 | `has_critical_failure` | Boolean flag for Ω constraint |
 
-## Citation
-
-If you use this code or dataset, please cite:
-
-```bibtex
-@article{le2026proportionate,
-  title={Proportionate Defense: A NIST-Aligned Cyber Risk Scoring Model for Resource-Constrained Enterprises},
-  author={Le, Tran Duc and Do, Phuc Hao and Dinh, Truong Duy and Pham, Van Dai and Nguyen, Thi Le Quyen},
-  journal={[Under Review]},
-  year={2026}
-}
-```
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-For questions or collaboration inquiries, please contact:
-
-- **Corresponding Author**: Truong Duy Dinh (<duydt@ptit.edu.vn>)
-
----
-
-*Last updated: January 2026*

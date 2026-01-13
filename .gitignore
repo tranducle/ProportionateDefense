@@ -37,6 +37,9 @@ references.bib
 # Allow TeX files in Supplementary/ (e.g. TikZ figures)
 !Supplementary/*.tex
 
+# Exclude Figures from Repo
+Figs/
+
 # Python
 __pycache__/
 *.pyc
