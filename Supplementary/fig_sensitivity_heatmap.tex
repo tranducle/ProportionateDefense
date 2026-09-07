@@ -1,5 +1,3 @@
-% TikZ Figure: Parameter Sensitivity Heatmap (Fixed Legend)
-% Standalone LaTeX file for generating PDF figure
 \documentclass[tikz,border=5pt]{standalone}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
@@ -9,7 +7,7 @@
 \begin{document}
 \begin{tikzpicture}
 \begin{axis}[
-    title={\textbf{Weighting Sensitivity: Breach Prediction Correlation}},
+    title={\textbf{Weighting Sensitivity: Mean Full Score ($S_{\text{total}}$)}},
     xlabel={$w_{tech}$ (Technical Weight)},
     ylabel={$w_{human}$ (Human Factor Weight)},
     xmin=0.2, xmax=0.6,
@@ -20,18 +18,19 @@
     yticklabels={0.2,0.25,0.3,0.33,0.35,0.4,0.45,0.5},
     colorbar,
     colorbar style={
-        ylabel={Correlation ($r$)},
+        ylabel={Mean Score ($S_{\text{total}}$)},
+        /pgf/number format/fixed,
+        /pgf/number format/precision=1
     },
     colormap/Blues,
-    point meta min=0.55,
-    point meta max=0.85,
+    point meta min=42.5,
+    point meta max=45.0,
     width=12cm,
     height=10cm,
     legend style={at={(0.95,0.05)},anchor=south east,nodes={scale=0.9, transform shape}},
 ]
 
-% 1. All Data Points (Heatmap Layer)
-% Added 'forget plot' so this does NOT mess up the legend
+% 1. All Data Points (Heatmap Layer) - Exact Mean Full Score from N=1000 simulation
 \addplot[
     scatter,
     only marks,
@@ -41,18 +40,18 @@
     opacity=0.8,
     forget plot
 ] coordinates {
-    (0.33, 0.33) [0.64]
-    (0.50, 0.30) [0.71]
-    (0.30, 0.45) [0.69]
-    (0.40, 0.35) [0.78]
-    (0.45, 0.35) [0.75]
-    (0.35, 0.35) [0.73]
-    (0.40, 0.30) [0.72]
-    (0.40, 0.40) [0.74]
-    (0.50, 0.35) [0.70]
-    (0.35, 0.40) [0.71]
-    (0.45, 0.30) [0.68]
-    (0.30, 0.35) [0.67]
+    (0.33, 0.33) [44.33]
+    (0.50, 0.30) [44.53]
+    (0.30, 0.45) [43.04]
+    (0.40, 0.35) [44.06]
+    (0.45, 0.35) [44.02]
+    (0.35, 0.35) [44.10]
+    (0.40, 0.30) [44.61]
+    (0.40, 0.40) [43.51]
+    (0.50, 0.35) [43.99]
+    (0.35, 0.40) [43.55]
+    (0.45, 0.30) [44.57]
+    (0.30, 0.35) [44.14]
 };
 
 % 2. Highlight: Proposed Model
@@ -63,7 +62,7 @@
     line width=2pt,
     color=red,
 ] coordinates {(0.40, 0.35)};
-\addlegendentry{Proposed ($r=0.78$)}
+\addlegendentry{Proposed (Mean = 44.06)}
 
 % 3. Highlight: Equal Weights
 \addplot[
@@ -73,7 +72,7 @@
     line width=1.5pt,
     color=black,
 ] coordinates {(0.33, 0.33)};
-\addlegendentry{Equal Weights ($r=0.64$)}
+\addlegendentry{Equal Weights (Mean = 44.33)}
 
 \end{axis}
 \end{tikzpicture}

@@ -1,57 +1,80 @@
 # Supplementary Materials
 
-**Manuscript:** Proportionate Defense: A NIST-Aligned Cyber Risk Scoring Model for Resource-Constrained Enterprises
+These files support the revised manuscript **Proportionate Defense: A NIST-Aligned Cyber Risk Scoring Model for Resource-Constrained Enterprises**.
 
-## Contents
+## Frozen paper artifacts
 
-### 1. Simulation Code
+- `synthetic_sme_dataset.csv`: the 1,000-profile synthetic population used for the reported analyses.
+- `simulation_results.csv`: the corresponding `M_PDS` scores and rating bands.
 
-- `simulate_scores.py` - Monte Carlo simulation engine implementing the $\mathcal{M}_{PDS}$ scoring algorithm
-- `generate_sme_data.py` - Synthetic SME profile generator
+The frozen artifacts are kept separate from newly generated samples so that the manuscript results remain directly reproducible.
 
-### 2. Dataset
+## Core scripts
 
-- `synthetic_sme_dataset.csv` - 1,000 synthetic SME profiles with the following columns:
-  - `id`: Unique identifier
-  - `sector`: FinTech, Retail, Manufacturing, or Services
-  - `size`: Micro (<10), Small (10-50), or Medium (50-250)
-  - `tech_score`: Technical security maturity (0-100)
-  - `human_score`: Human factor score (0-100)
-  - `gov_score`: Governance maturity (0-100)
-  - `shadow_it_ratio`: Unmanaged/Managed asset ratio
-  - `has_critical_failure`: Boolean flag for Ω constraint
+### `simulate_scores.py`
 
-### 3. Parameter Justification
+Applies the current scoring rule:
 
-- `weighting_justification.md` - Theoretical basis for the [0.40, 0.35, 0.25] weighting vector
-- `nist_csf_2_mapping.md` - Complete mapping of model variables to NIST CSF 2.0 subcategories
+```text
+S_total = Omega * (0.40*S_tech + 0.35*S_human + 0.25*S_gov) * exp(-0.5*R_shadow)
+```
 
-### 4. TikZ Figures
-
-- `fig_decay_function.tex` - LaTeX/TikZ source for the Shadow IT Decay Function curve
-- `fig_sensitivity_heatmap.tex` - Sensitivity analysis visualization
-
-## Usage
-
-To reproduce the simulation results:
+Example:
 
 ```bash
-# Generate synthetic dataset
-python generate_sme_data.py
-
-# Run Monte Carlo simulation
-python simulate_scores.py
+python simulate_scores.py \
+  --input synthetic_sme_dataset.csv \
+  --output simulation_results_reproduced.csv
 ```
+
+### `generate_sme_data.py`
+
+Generates a new synthetic population using the distributions described in the manuscript. It does not overwrite the frozen paper dataset by default.
+
+```bash
+python generate_sme_data.py --seed 2026 --output synthetic_sme_dataset_generated.csv
+```
+
+Use a fixed seed when repeatability of a newly generated population is required.
+
+## Comparative validation introduced during revision
+
+The revised manuscript adds a paired comparison with a controlled IG1-style additive baseline, plus `Omega`-only and `Psi`-only ablations.
+
+Run:
+
+```bash
+python validation/compare_additive_baseline.py \
+  --input synthetic_sme_dataset.csv \
+  --existing-results simulation_results.csv \
+  --outdir validation/results
+
+python validation/mechanism_robustness_check.py \
+  --input validation/results/per_profile_scores.csv \
+  --outdir validation/results
+```
+
+The comparator is a controlled additive surrogate. It is not an official CIS IG1 numerical score.
+
+## Documentation
+
+- `nist_csf_2_mapping.md`: current compact NIST CSF 2.0 traceability mapping and scope boundary.
+- `weighting_justification.md`: current parameter rationale and weight-sensitivity interpretation.
+
+## Figure sources
+
+- `fig_decay_function.tex`: TikZ source for the Shadow IT decay function.
+- `fig_sensitivity_heatmap.tex`: TikZ source for the current sensitivity visualization.
+- `fig_sensitivity_heatmap.pdf`: compiled sensitivity figure.
+- `fig_additive_ablation.tex`: TikZ source for the paired divergence and component-ablation figure added during revision.
+- `fig_additive_ablation.pdf`: compiled paired divergence and component-ablation figure.
 
 ## Requirements
 
-- Python 3.8+
-- pandas
-- numpy
+```bash
+python -m pip install numpy pandas
+```
 
-## License
+## Interpretation boundary
 
-Supplementary materials are provided for peer review purposes.
-
----
-*Prepared: 2026-01-12*
+The repository reproduces structural results on the stated synthetic data and scoring rules. It does not provide evidence of real-world breach prediction, calibration, causal security improvement, or deployment effectiveness.

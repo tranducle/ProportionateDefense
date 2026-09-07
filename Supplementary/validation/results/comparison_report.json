@@ -1,0 +1,33 @@
+{
+  "baseline_name": "IG1-style additive baseline",
+  "baseline_boundary": "Controlled additive surrogate; not an official CIS numerical score.",
+  "input": {
+    "rows": 1000,
+    "input_sha256": "bfe2ed0a1c475d6b1b1f07b36584b90f905d4719cb3868534fcdf21923036786",
+    "existing_results_sha256": "e10c857e76c98f079696ba32857d4a69c92377dd578e4c3643e6b46d3ef4844e",
+    "max_abs_recomputation_error": 1.4210854715202004e-14
+  },
+  "comparison": {
+    "mean_additive": 65.24505174633856,
+    "mean_full": 44.060873749364504,
+    "spearman_additive_vs_full": 0.5224588612067366,
+    "rating_changed_n": 766,
+    "rating_changed_pct": 76.6,
+    "additive_ge70_to_full_critical_n": 107,
+    "omega_failure_n": 43,
+    "omega_failure_additive_ge50_n": 38,
+    "omega_failure_additive_ge70_n": 16,
+    "omega_ok_high_shadow_n": 219,
+    "omega_ok_high_shadow_additive_ge50_to_full_critical_n": 203,
+    "omega_ok_high_shadow_additive_ge70_to_full_critical_n": 55,
+    "omega_ok_high_shadow_mean_additive": 64.1821360531403,
+    "omega_ok_high_shadow_mean_full": 29.721112210387417,
+    "median_abs_rank_shift": 173.0,
+    "p95_abs_rank_shift": 549.5499999999995,
+    "max_abs_rank_shift": 957.0
+  },
+  "claim_boundary": [
+    "These are structural comparisons on the frozen synthetic population.",
+    "They do not establish breach prediction, calibration, causality, or superiority over CIS IG1."
+  ]
+}

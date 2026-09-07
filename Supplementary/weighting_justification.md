@@ -1,36 +1,54 @@
-# Justification of Model Weighting Distribution
+# Weighting Rationale for the Proportionate Defense Model
 
-## 1. The Proposed Distribution
-The Composite Risk Score ($S_{total}$) uses the following weighting vector:
-$$ W = [w_{tech}, w_{human}, w_{gov}] = [0.40, 0.35, 0.25] $$
+## Current weighting vector
 
-## 2. Theoretical Basis & Evidence
+The reported implementation uses:
 
-### 2.1 Technical Security ($w_T = 0.40$)
-**Rationale:** Technical controls represent the "hard" exterior of the organization. While human error is a common *entry vector*, technical controls (firewalls, patching, EDR) are the only mechanism to *stop* an active attack once initiated.
-*   **Evidence:**
-    *   **NIST CSF Alignment:** The "Protect" and "Detect" functions are predominantly technical. Since our model is "NIST-Aligned," technical controls must hold the plurality of weight.
-    *   **Automation:** Technical controls function 24/7 without fatigue, unlike human monitoring.
+```text
+W = [w_tech, w_human, w_gov] = [0.40, 0.35, 0.25]
+```
 
-### 2.2 Human Factor ($w_H = 0.35$)
-**Rationale:** This weight is significantly higher than in traditional enterprise models (which often weight GRC higher). This reflects the specific reality of SMEs where the "Human Firewall" is often the *only* line of defense against social engineering.
-*   **Evidence:**
-    *   **Boletsis et al. (2021):** Emphasize that SMEs "rarely conduct thorough risk assessment" and rely on "socio-technical" factors.
-    *   **Industry Data:** Verizon DBIR consistently attributes ~74-82% of breaches to the "Human Element" (Errors + Social Engineering).
-    *   **SME Context:** In flat hierarchies (noted in `sme_risk_factors.md`), a single employee often has administrative privileges, magnifying the impact of a single human error.
+These values are modeling parameters. They are not presented as empirically optimal weights.
 
-### 2.3 Governance & Compliance ($w_G = 0.25$)
-**Rationale:** Governance is weighted lowest not because it is unimportant, but because it is a *lagging indicator* of security in SMEs. A policy document does not stop ransomware; an offline backup (Technical) does.
-*   **Evidence:**
-    *   **NIS2 Governance Design (2025):** Notes that "formal compliance is burdensome" for micro-SMEs. Over-weighting governance would bias the score against smaller, agile firms that might be technically secure but document-poor.
-    *   **"Proportionate" Defense:** To be "proportionate" (Title), we must prioritize *action* (Tech/Human) over *documentation* (Gov).
+## Technical domain (`w_tech = 0.40`)
 
-## 3. Sensitivity Analysis Plan
-To ensure robustness, we will perform a sensitivity analysis in **Phase 4 (Simulation)**:
-1.  **Scenario A (Tech-Heavy):** Shift weights to $[0.60, 0.20, 0.20]$.
-    *   *Hypothesis:* Will over-score SMEs with good tools but poor culture (the "Maginot Line" effect).
-2.  **Scenario B (Human-Centric):** Shift weights to $[0.20, 0.60, 0.20]$.
-    *   *Hypothesis:* Will over-score SMEs with great awareness but obsolete hardware.
+The technical domain receives the largest share because the model is intended to preserve the effect of controls that operate continuously and can directly interrupt or contain technical compromise. The current technical observations include endpoint protection/monitoring, patch management, backup integrity, MFA, and DNS or malicious-domain restriction.
 
-## 4. Conclusion
-The $[0.40, 0.35, 0.25]$ distribution represents a **"Survival-First"** approach tailored to the resource-constrained SME, prioritizing the actual capabilities to resist attacks (Tech + Human) over the administrative layer (Gov).
+The value `0.40` is a design choice rather than an estimate learned from incident data.
+
+## Human domain (`w_human = 0.35`)
+
+The human-domain weight reflects the prominence of the human element in breach reporting and prior socio-technical SME cybersecurity research. In small organizations, individual users may also hold broad access or administrative privileges, which increases the practical importance of phishing susceptibility, training, and reporting behavior.
+
+The current Human Factor equation uses a controlled phishing failure measure when available and normalized training frequency. The mapped reporting observation remains diagnostic and is not added as a separate weighted term in the current implementation.
+
+## Governance domain (`w_gov = 0.25`)
+
+Governance remains part of the base score because incident planning, supplier review, risk-transfer evidence, access review, and asset inventory affect how an SME prepares for and manages cyber risk. The current model assigns governance a smaller share than the technical and human domains to keep the compact score focused on operational security conditions while still retaining governance visibility.
+
+This value is likewise a modeling choice rather than an empirical estimate of the marginal effect of governance activity on breach probability or loss.
+
+## Sensitivity analysis
+
+The revised analysis evaluates the default vector alongside three alternatives:
+
+| Configuration | `w_tech` | `w_human` | `w_gov` |
+| --- | ---: | ---: | ---: |
+| Default | 0.40 | 0.35 | 0.25 |
+| Equal | 0.33 | 0.33 | 0.34 |
+| Technology-heavy | 0.50 | 0.30 | 0.20 |
+| Human-centric | 0.30 | 0.45 | 0.25 |
+
+On the frozen 1,000-profile synthetic population, the qualitative divergence between the additive comparator and the full model remains similar across these configurations. The analysis is intended to characterize sensitivity, not identify an optimal weighting vector.
+
+The exact outputs are reproduced by:
+
+```bash
+python validation/mechanism_robustness_check.py \
+  --input validation/results/per_profile_scores.csv \
+  --outdir validation/results
+```
+
+## Interpretation boundary
+
+The weights should be recalibrated before operational deployment when suitable empirical incident, claims, or field data are available. The current study supports statements about score behavior under the stated synthetic assumptions, not causal claims about the security effect of any particular weight.

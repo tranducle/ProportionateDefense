@@ -1,96 +1,134 @@
-# Supplementary Materials: Proportionate Defense
+# Proportionate Defense: Reproducibility Materials
 
-[![Paper Status](https://img.shields.io/badge/status-under%20review-yellow)](https://arxiv.org/)
+[![Paper Status](https://img.shields.io/badge/status-revision-yellow)](https://github.com/tranducle/ProportionateDefense)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## Overview
-
-This repository contains the **supplementary materials** (simulation code and dataset) for the research paper:
+This repository contains the public reproducibility materials for:
 
 > **Proportionate Defense: A NIST-Aligned Cyber Risk Scoring Model for Resource-Constrained Enterprises**
 
-## Abstract
+## Current model scope
 
-Small and Medium Enterprises (SMEs) face a "Security Paradox": they are high-value targets for cybercriminals but lack the resources for enterprise-grade defense. This paper proposes the **Proportionate Defense Scoring Model (M_PDS)**, a lightweight, NIST-aligned framework designed for organizational survival. We introduce:
+The Proportionate Defense Scoring Model (`M_PDS`) combines:
 
-- A **Critical Failure Constraint (Ω)** to enforce a survival hierarchy
-- A novel **Shadow IT Decay Function (Ψ)** to model non-linear risk of unmanaged SaaS adoption
-- A **Behavioral Weighting Vector** optimized for flat SME hierarchies
+- a transparent weighted base score over technical, human, and governance domains;
+- a binary Critical Failure Constraint (`Omega`) that makes declared survival-critical failures non-compensatory; and
+- a multiplicative Shadow IT modifier (`Psi`) based on unmanaged SaaS exposure.
 
-## Repository Structure
+The reported study evaluates structural score behavior on a frozen population of 1,000 synthetic SME profiles. The results do **not** establish real-world breach prediction, calibration, causal risk reduction, or empirical superiority over CIS IG1.
 
+## Repository structure
+
+```text
+Supplementary/
+├── generate_sme_data.py             # Generate new synthetic populations
+├── simulate_scores.py               # Apply the M_PDS scoring formula
+├── synthetic_sme_dataset.csv        # Frozen 1,000-profile dataset used in the paper
+├── simulation_results.csv           # Frozen M_PDS results for that dataset
+├── nist_csf_2_mapping.md            # Current compact NIST CSF 2.0 mapping
+├── weighting_justification.md       # Weight rationale and sensitivity boundary
+├── fig_decay_function.tex           # TikZ source for the Shadow IT decay curve
+├── fig_sensitivity_heatmap.tex      # TikZ source for the sensitivity visualization
+├── fig_sensitivity_heatmap.pdf      # Compiled sensitivity figure
+├── fig_additive_ablation.tex        # TikZ source for paired divergence/ablation figure
+└── validation/
+    ├── compare_additive_baseline.py # Paired additive-baseline + ablation analysis
+    ├── mechanism_robustness_check.py# Mechanism identities + weight robustness
+    └── results/                     # Reproduced comparison artifacts
 ```
-├── Supplementary/               # Reproducibility materials
-│   ├── simulate_scores.py       # Monte Carlo simulation engine
-│   ├── generate_sme_data.py     # Synthetic SME profile generator
-│   ├── synthetic_sme_dataset.csv # 1,000 SME profiles
-│   ├── nist_csf_2_mapping.md    # NIST CSF 2.0 variable mapping
-│   ├── weighting_justification.md # Domain weight rationale
-│   ├── fig_decay_function.tex   # TikZ source for decay curve
-│   └── fig_sensitivity_heatmap.tex # TikZ source for heatmap
-│
-└── README.md                    # This file
-```
 
-## Quick Start
+The repository intentionally excludes the journal manuscript source and author-identifying submission files. The public artifact focuses on code, data, model documentation, and reproducibility outputs.
 
-### Requirements
+## Requirements
 
 ```bash
-pip install numpy pandas
+python -m pip install numpy pandas
 ```
 
-### Reproduce Simulation Results
+Python 3.8 or newer is recommended.
+
+## Reproduce the reported M_PDS scores
+
+From the repository root:
 
 ```bash
 cd Supplementary
-
-# Generate synthetic SME dataset
-python generate_sme_data.py
-
-# Run Monte Carlo simulation (N=1000)
-python simulate_scores.py
+python simulate_scores.py \
+  --input synthetic_sme_dataset.csv \
+  --output simulation_results_reproduced.csv
 ```
 
-## Key Model Components
+The reproduced `final_risk_score` values should match `simulation_results.csv` to floating-point precision.
 
-### 1. Total Risk Score Formula
+## Reproduce the paired additive-baseline and ablation analysis
 
+```bash
+python validation/compare_additive_baseline.py \
+  --input synthetic_sme_dataset.csv \
+  --existing-results simulation_results.csv \
+  --outdir validation/results
+
+python validation/mechanism_robustness_check.py \
+  --input validation/results/per_profile_scores.csv \
+  --outdir validation/results
 ```
-S_total = Ω × (Σ w_i × S_i) × Ψ(R_shadow)
+
+The controlled additive comparator uses the same three domain scores and the same weighting budget as `M_PDS`. It is labeled an **IG1-style additive baseline** because CIS IG1 provides prioritized safeguards rather than an official scalar scoring equation. The comparator is therefore a controlled surrogate used to isolate the effects of `Omega` and `Psi`.
+
+## Headline reproducibility checks
+
+On the frozen 1,000-profile dataset, the current scripts reproduce the revised manuscript values:
+
+| Quantity | Value |
+| --- | ---: |
+| Mean additive score | 65.25 |
+| Mean full `M_PDS` score | 44.06 |
+| Profiles changing rating band | 766 / 1,000 |
+| Additive score >= 70 but full score < 50 | 107 |
+| `Omega = 0` profiles | 43 |
+| `Omega = 1` and `R_shadow >= 1` profiles | 219 |
+| Spearman association, additive vs. full | 0.522 |
+
+These values describe the frozen synthetic population and scoring rules only.
+
+## Generate a new synthetic population
+
+The frozen dataset is the source for the paper's reported values. To create a new synthetic population for sensitivity analysis without overwriting the paper dataset:
+
+```bash
+python generate_sme_data.py --seed 2026 --output synthetic_sme_dataset_generated.csv
 ```
 
-Where:
+Omit `--seed` for a stochastic sample. Results from a newly generated population will generally differ from the paper's frozen results.
 
-- **Ω ∈ {0, 1}**: Critical Failure Constraint (binary kill-switch)
-- **w = [0.40, 0.35, 0.25]**: Domain weighting vector [Tech, Human, Gov]
-- **Ψ(x) = e^(-λx)**: Shadow IT Decay Function (λ=0.5)
+## Model formula
 
-### 2. Critical Controls (C_crit)
+```text
+S_base  = 0.40*S_tech + 0.35*S_human + 0.25*S_gov
+Omega   = 0 if a declared critical prerequisite fails, else 1
+Psi     = exp(-0.5*R_shadow)
+S_total = Omega * S_base * Psi
+```
 
-The model enforces two survival-critical controls:
+The weights and `lambda = 0.5` are modeling parameters rather than empirically estimated optima.
 
-- **Immutable Backups**: Recovery capability against ransomware
-- **Perimeter Integrity**: Prevention of trivial remote access (e.g., open RDP)
+## NIST CSF 2.0 mapping
 
-If either control is missing, Ω = 0 → S_total = 0.
+The current implementation uses a compact assessment surface rather than claiming full CSF Core coverage. See `Supplementary/nist_csf_2_mapping.md` for the 13 mapped observations, the perimeter-integrity check, the derived Shadow IT ratio, and the interpretation boundary.
 
-## Dataset Description
+## Data provenance
 
-The `synthetic_sme_dataset.csv` contains 1,000 profiles with:
+The public repository preserves the exact frozen input and scored-result artifacts used by the revised paired comparison:
 
-| Column | Description |
-|--------|-------------|
-| `id` | Unique identifier |
-| `sector` | FinTech (20%), Retail (30%), Manufacturing (20%), Services (30%) |
-| `size` | Micro (<10), Small (10-50), Medium (50-250) |
-| `tech_score` | Technical security maturity (0-100) |
-| `human_score` | Human factor score (0-100) |
-| `gov_score` | Governance maturity (0-100) |
-| `shadow_it_ratio` | Unmanaged/Managed asset ratio |
-| `has_critical_failure` | Boolean flag for Ω constraint |
+```text
+synthetic_sme_dataset.csv
+SHA-256: bfe2ed0a1c475d6b1b1f07b36584b90f905d4719cb3868534fcdf21923036786
+
+simulation_results.csv
+SHA-256: e10c857e76c98f079696ba32857d4a69c92377dd578e4c3643e6b46d3ef4844e
+```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The software and repository materials are distributed under the MIT License. See [LICENSE](LICENSE).

@@ -1,71 +1,75 @@
-import pandas as pd
+#!/usr/bin/env python3
+"""Generate synthetic SME profiles for Proportionate Defense experiments.
+
+The paper's reported results use the frozen ``synthetic_sme_dataset.csv``
+shipped with this repository. This generator is provided for sensitivity and
+replication studies with newly sampled populations. Use ``--seed`` when a
+repeatable new sample is required.
+"""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+from typing import Optional
+
 import numpy as np
+import pandas as pd
 
-# Constants
 N_SAMPLES = 1000
-
-# Distributions based on Methodology V2
 SECTORS = ["FinTech", "Retail", "Manufacturing", "Services"]
 SIZES = ["Micro (<10)", "Small (10-50)", "Medium (50-250)"]
-
-# Probabilities
 P_SECTOR = [0.20, 0.30, 0.20, 0.30]
 P_SIZE = [0.50, 0.35, 0.15]
 
-def generate_dataset():
-    """Generates a synthetic SME dataset based on predefined distributions."""
-    
-    # Create DataFrame
-    df = pd.DataFrame(index=range(N_SAMPLES))
-    df['id'] = [f"sme_{i:04d}" for i in range(N_SAMPLES)]
-    
-    # 1. Categorical Data
-    df['sector'] = np.random.choice(SECTORS, N_SAMPLES, p=P_SECTOR)
-    df['size'] = np.random.choice(SIZES, N_SAMPLES, p=P_SIZE)
 
-    # 2. Correlated Continuous Data (Scores)
-    # Assume Human factor is generally lower than Technical
-    mean = [70, 55]  # Mean for Tech Score, Human Score
-    cov = [[150, 60], [60, 200]]  # Covariance matrix
-    tech_scores, human_scores = np.random.multivariate_normal(mean, cov, N_SAMPLES).T
-    
-    # Governance score independent, skewed high (most orgs have *some* policy)
-    gov_scores = np.random.beta(a=5, b=2, size=N_SAMPLES) * 100
-    
-    # Clip scores to be within [0, 100]
-    df['tech_score'] = np.clip(tech_scores, 10, 100)
-    df['human_score'] = np.clip(human_scores, 0, 90)
-    df['gov_score'] = np.clip(gov_scores, 20, 100)
+def generate_dataset(n_samples: int = N_SAMPLES, seed: Optional[int] = None) -> pd.DataFrame:
+    """Generate a synthetic SME population using the manuscript distributions."""
+    rng = np.random.default_rng(seed)
+    df = pd.DataFrame(index=range(n_samples))
+    df["id"] = [f"sme_{i:04d}" for i in range(n_samples)]
 
-    # 3. Shadow IT Ratio (LogNormal distribution for long tail)
-    shadow_mu = -0.5
-    shadow_sigma = 0.7
-    df['shadow_it_ratio'] = np.random.lognormal(shadow_mu, shadow_sigma, N_SAMPLES)
+    # Sector and size labels are sampled independently of score inputs.
+    df["sector"] = rng.choice(SECTORS, n_samples, p=P_SECTOR)
+    df["size"] = rng.choice(SIZES, n_samples, p=P_SIZE)
 
-    # 4. Critical Failures (as a rare event)
-    df['has_critical_failure'] = np.random.choice([True, False], N_SAMPLES, p=[0.05, 0.95])
-    
-    print(f"Generated {N_SAMPLES} synthetic SME profiles.")
+    mean = [70, 55]
+    cov = [[150, 60], [60, 200]]
+    tech_scores, human_scores = rng.multivariate_normal(mean, cov, n_samples).T
+    gov_scores = rng.beta(a=5, b=2, size=n_samples) * 100
+
+    df["tech_score"] = np.clip(tech_scores, 10, 100)
+    df["human_score"] = np.clip(human_scores, 0, 90)
+    df["gov_score"] = np.clip(gov_scores, 20, 100)
+
+    df["shadow_it_ratio"] = rng.lognormal(mean=-0.5, sigma=0.7, size=n_samples)
+    df["has_critical_failure"] = rng.choice(
+        [True, False], n_samples, p=[0.05, 0.95]
+    )
     return df
 
-def save_dataset(df, path):
-    """Saves the dataset to a CSV file."""
-    try:
-        df.to_csv(path, index=False)
-        print(f"Dataset successfully saved to {path}")
-    except Exception as e:
-        print(f"Error saving dataset: {e}")
 
-# --- EXECUTION ---
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--rows", type=int, default=N_SAMPLES, help="Number of profiles")
+    parser.add_argument("--seed", type=int, default=None, help="Optional NumPy RNG seed")
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("synthetic_sme_dataset_generated.csv"),
+        help="Output CSV. The frozen paper dataset is not overwritten by default.",
+    )
+    args = parser.parse_args()
+
+    df = generate_dataset(args.rows, args.seed)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(args.output, index=False)
+    print(f"Generated {len(df)} profiles -> {args.output}")
+    if args.seed is None:
+        print("No seed supplied; this generated population is intentionally stochastic.")
+    else:
+        print(f"Seed: {args.seed}")
+
+
 if __name__ == "__main__":
-    dataset = generate_dataset()
-    # Save in the location specified by the methodology document
-    output_path = "PAPER/5_Experiments_Simulations/synthetic_sme_dataset.csv"
-    save_dataset(dataset, output_path)
-    
-    # Display summary
-    print("\n--- Dataset Summary ---")
-    print(dataset.head())
-    print("\n--- Statistical Overview ---")
-    print(dataset.describe())
-    print("\n-----------------------\n")
+    main()

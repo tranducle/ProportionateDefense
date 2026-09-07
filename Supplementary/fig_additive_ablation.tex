@@ -1,0 +1,112 @@
+\documentclass[tikz,border=2pt]{standalone}
+\usepackage{newtxtext,newtxmath}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
+
+% Publication palette coordinated with the blue/periwinkle styling used
+% elsewhere in the manuscript. Marker shapes and line styles remain distinct
+% so the figure is still interpretable in grayscale.
+\definecolor{figblue}{RGB}{104,116,255}
+\definecolor{figbluedark}{RGB}{39,52,151}
+\definecolor{figbluelight}{RGB}{198,204,255}
+\definecolor{figcritical}{RGB}{205,55,55}
+
+\begin{document}
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={group size=2 by 1, horizontal sep=1.25cm},
+    height=6.0cm,
+    tick label style={font=\scriptsize},
+    label style={font=\footnotesize},
+    title style={font=\footnotesize},
+]
+
+\nextgroupplot[
+    width=8.4cm,
+    xmin=30, xmax=92,
+    ymin=0, ymax=92,
+    xlabel={IG1-style additive score},
+    ylabel={Full $\mathcal{M}_{PDS}$ score},
+    title={(a) Paired score divergence on the same 1,000 profiles},
+    grid=major,
+    grid style={line width=0.2pt, draw=gray!25},
+    legend style={font=\scriptsize, draw=none, fill=none, at={(0.02,0.98)}, anchor=north west, row sep=-1pt},
+    legend cell align={left},
+]
+% Identity line: no modifier effect.
+\addplot[black, dashed, line width=0.65pt, forget plot] coordinates {(30,30) (92,92)};
+% Critical threshold under the full model.
+\addplot[figcritical, dotted, line width=0.70pt, forget plot] coordinates {(30,50) (92,50)};
+% All profiles as a light background cloud.
+\addplot[
+    only marks,
+    mark=*,
+    mark size=0.55pt,
+    draw=figbluelight!85!gray,
+    fill=figbluelight,
+    opacity=0.32,
+] table[
+    x=additive_score,
+    y=mpds_score,
+    col sep=comma
+] {validation/results/per_profile_scores.csv};
+\addlegendentry{All profiles}
+% Profiles at or beyond the manuscript's control-parity Shadow-IT threshold.
+\addplot[
+    only marks,
+    mark=triangle*,
+    mark size=1.15pt,
+    draw=figbluedark,
+    fill=figblue,
+    opacity=0.86,
+    restrict expr to domain={\thisrow{omega}}{1:1},
+    restrict expr to domain={\thisrow{shadow_it_ratio}}{1:100}
+] table[
+    x=additive_score,
+    y=mpds_score,
+    col sep=comma
+] {validation/results/per_profile_scores.csv};
+\addlegendentry{$\Omega=1$, $R_{shadow}\geq1$}
+% Critical-control failures, forced to zero by Omega.
+\addplot[
+    only marks,
+    mark=x,
+    mark size=1.55pt,
+    line width=0.7pt,
+    draw=figbluedark,
+    restrict expr to domain={\thisrow{omega}}{0:0}
+] table[
+    x=additive_score,
+    y=mpds_score,
+    col sep=comma
+] {validation/results/per_profile_scores.csv};
+\addlegendentry{$\Omega=0$}
+\node[font=\scriptsize, text=figcritical, anchor=south east, fill=white, inner sep=1.5pt] at (axis cs:91,50) {Critical boundary};
+
+\nextgroupplot[
+    width=7.2cm,
+    ymin=0, ymax=70,
+    ylabel={Profiles rated Critical (\%)},
+    symbolic x coords={Additive,Omega,Psi,Full},
+    xtick=data,
+    xticklabels={Add.,$\Omega$,$\Psi$,Full},
+    x tick label style={font=\scriptsize},
+    ybar,
+    bar width=12pt,
+    nodes near coords,
+    nodes near coords style={font=\scriptsize, text=figbluedark, /pgf/number format/fixed, /pgf/number format/precision=1},
+    title={(b) Component ablation},
+    grid=major,
+    grid style={line width=0.2pt, draw=gray!25},
+]
+\addplot[draw=figbluedark, line width=0.55pt, fill=figblue!72] coordinates {
+    (Additive,4.6)
+    (Omega,8.4)
+    (Psi,60.4)
+    (Full,61.7)
+};
+
+\end{groupplot}
+\end{tikzpicture}
+\end{document}

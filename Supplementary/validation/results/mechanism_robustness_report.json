@@ -1,0 +1,78 @@
+{
+  "mechanism_identity": {
+    "omega0_n": 43,
+    "omega1_n": 957,
+    "omega0_full_zero_max_abs_error": 0.0,
+    "omega0_omega_only_zero_max_abs_error": 0.0,
+    "omega1_full_equals_psi_only_max_abs_error": 0.0,
+    "omega1_additive_equals_omega_only_max_abs_error": 0.0,
+    "omega1_high_shadow_n": 219,
+    "omega1_high_shadow_full_critical_n": 218,
+    "omega1_high_shadow_additive_ge50_to_full_critical_n": 203,
+    "omega1_high_shadow_additive_ge70_to_full_critical_n": 55,
+    "factorial_interaction_nonzero_n": 43
+  },
+  "weight_robustness": [
+    {
+      "weighting": "default",
+      "w_tech": 0.4,
+      "w_human": 0.35,
+      "w_gov": 0.25,
+      "mean_additive": 65.24505174633856,
+      "mean_full": 44.060873749364504,
+      "mean_reduction": 21.18417799697406,
+      "spearman_additive_vs_full": 0.5224588612067366,
+      "rating_changed_n": 766,
+      "rating_changed_pct": 76.6,
+      "additive_ge70_to_full_critical_n": 107,
+      "full_critical_n": 617,
+      "full_critical_pct": 61.7
+    },
+    {
+      "weighting": "equal",
+      "w_tech": 0.33,
+      "w_human": 0.33,
+      "w_gov": 0.34,
+      "mean_additive": 65.63245602154228,
+      "mean_full": 44.332927856038644,
+      "mean_reduction": 21.29952816550363,
+      "spearman_additive_vs_full": 0.5273481243600626,
+      "rating_changed_n": 767,
+      "rating_changed_pct": 76.7,
+      "additive_ge70_to_full_critical_n": 103,
+      "full_critical_n": 603,
+      "full_critical_pct": 60.3
+    },
+    {
+      "weighting": "tech_heavy",
+      "w_tech": 0.5,
+      "w_human": 0.3,
+      "w_gov": 0.2,
+      "mean_additive": 65.97416037551308,
+      "mean_full": 44.53443339314785,
+      "mean_reduction": 21.43972698236524,
+      "spearman_additive_vs_full": 0.5163597207717341,
+      "rating_changed_n": 762,
+      "rating_changed_pct": 76.2,
+      "additive_ge70_to_full_critical_n": 120,
+      "full_critical_n": 600,
+      "full_critical_pct": 60.0
+    },
+    {
+      "weighting": "human_centric",
+      "w_tech": 0.3,
+      "w_human": 0.45,
+      "w_gov": 0.25,
+      "mean_additive": 63.69977919386781,
+      "mean_full": 43.038636053469816,
+      "mean_reduction": 20.661143140397986,
+      "spearman_additive_vs_full": 0.5440999307078618,
+      "rating_changed_n": 764,
+      "rating_changed_pct": 76.4,
+      "additive_ge70_to_full_critical_n": 100,
+      "full_critical_n": 662,
+      "full_critical_pct": 66.2
+    }
+  ],
+  "claim_boundary": "Mechanism identities and weight sensitivity on the frozen synthetic profiles only; no predictive-validity claim."
+}
